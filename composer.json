@@ -1,5 +1,5 @@
 {
-    "name": "Jontsa/prh-ad-client",
+    "name": "jontsa/prh-ad-client",
     "type": "library",
     "description": "Simple client to access Finnish Patent and Registration Office open data.",
     "keywords": [],
@@ -19,7 +19,7 @@
     },
 
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "PrhAdClient\\": "src/"
         }
     },
