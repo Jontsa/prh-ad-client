@@ -1,0 +1,28 @@
+{
+    "name": "Jontsa/prh-ad-client",
+    "type": "library",
+    "description": "Simple client to access Finnish Patent and Registration Office open data.",
+    "keywords": [],
+    "homepage": "http://github.com/Jontsa/prh-ad-client",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joni Halme",
+            "email": "joni.halme@sirumobile.com",
+            "role": "Developer"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.5",
+        "guzzlehttp/guzzle": "~6.1"
+    },
+
+    "autoload": {
+        "psr-0": {
+            "PrhAdClient\\": "src/"
+        }
+    },
+    
+    "minimum-stability": "stable"
+}
