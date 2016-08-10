@@ -1,36 +1,62 @@
 <?php
-namespace PrhAdClient;
+/**
+ * This file is part of the jontsa/prhadclient package.
+ *
+ * For copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use GuzzleHttp\Client;
+namespace PrhAdClient;
 
 class BusinessInformation {
 
-    private $url = 'http://avoindata.prh.fi/bis/v1';
+    private static $sources = [
+        0 => 'Common',
+        1 => 'Finnish Patent and Registration Office',
+        2 => 'Tax Administration',
+        3 => 'Business Information System'
+    ];
 
     /**
-     * Lookup business information from Finnish Patent and Registration Office using Finnish business id.
-     * @param  string $businessid Finnish business id
-     * @return false|null|array Business information as an array, false if not found or null if response was not valid
-     * @todo   throw exception if response is not valid json
-     * @todo   throw exception on connection errors
+     * @var array
      */
-    public function findByBusinessId($businessid) {
-        // Strip all extra characters from business id
-        $businessid = preg_replace('/[0-9a-z-]^/', '', $businessid);
+    private $data;
 
-        // Get data from PRH
-        $url = $this->url . "/{$businessid}";
-        $client = new Client();
-        $response = $client->get($url);
+    /**
+     * Constructor takes business data received from BusinessLookup::findByBusinessId().
+     * 
+     * @param array $data Business data
+     */
+    public function __construct(array $data) {
+        $this->data = $data;
+    }
 
-        // 404
-        if($response->getStatusCode() == '404') {
-            return false;
-        }
+    /**
+     * Retrieves a variable from data received from PRH.
+     * 
+     * @param  string $k       Variable name
+     * @param  mixed  $default Default value if variable is not found
+     * @return mixed
+     */
+    public function get($k, $default = null) {
+        return array_key_exists($k, $this->data) ? $this->data[$k] : $default;
+    }
 
-        $body = json_decode((string)$response->getBody(), true);
+    /**
+     * Returns all data gathered from BusinessLookup.
+     * 
+     * @return array
+     */
+    public function getAll() {
+        return $this->data;
+    }
 
-        return $body;
+    private function getPrimaryCompanyName() {
+        return $this->data['name'];
+    }
+
+    public function getSourceAsText($source_id) {
+        return isset($this->sources[$source_id]) ? $this->sources[$source_id] : $source_id;
     }
 
 }
