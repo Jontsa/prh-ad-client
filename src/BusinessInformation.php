@@ -8,6 +8,9 @@
 
 namespace PrhAdClient;
 
+/**
+ * Class containing data received from PRH API about single business.
+ */
 class BusinessInformation {
 
     private static $sources = [
@@ -51,12 +54,54 @@ class BusinessInformation {
         return $this->data;
     }
 
-    private function getPrimaryCompanyName() {
+    /**
+     * Returns company primary name.
+     *
+     * By default it will lookup primary company name. You can give a two letter language code to see if
+     * there is a name for that language. If translation is not found, the primary name is returned.
+     * 
+     * @param  string $language Optional two letter language code
+     * @return string
+     */
+    public function getPrimaryCompanyName($language = null) {
+        if($language) {
+            $names = array_merge($this->data['names'], $this->data['auxiliaryNames']);
+            foreach($names as $name) {
+                if(isset($name['language']) && $name['language'] == $language && $name['order'] >= 0 && $name['version'] == 1 && $this->hasExpired($name) == false) {
+                    return $name['name'];
+                }
+            }
+        }
         return $this->data['name'];
     }
 
-    public function getSourceAsText($source_id) {
-        return isset($this->sources[$source_id]) ? $this->sources[$source_id] : $source_id;
+    public function getAuxiliaryNames() {
+        $retval = [];
+        foreach($this->data['auxiliaryNames'] as $name) {
+            if($name['order'] <> 0 && $name['version'] == 1 && $this->hasExpired($name) == false) {
+                $retval[] = $name;
+            }
+        }
+
+        return $retval;
+    }
+
+    /**
+     * Translates source-integer in data to a human readable form.
+     * 
+     * @param  int $source_id Source id from data
+     * @return mixed Either source as string or $source_id if unknown
+     */
+    public static function getSourceAsText($source_id) {
+        return isset(self::$sources[$source_id]) ? self::$sources[$source_id] : $source_id;
+    }
+
+    private function hasExpired($data) {
+        if(empty($data['endDate'])) return false;
+
+        $date1 = new \DateTime($data['endDate']);
+        $date2 = new \DateTime();
+        return ((int)$date2->format('Ymd') >= (int)$date1->format('Ymd'));
     }
 
 }
