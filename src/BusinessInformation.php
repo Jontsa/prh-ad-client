@@ -75,6 +75,10 @@ class BusinessInformation {
         return $this->data['name'];
     }
 
+    /**
+     * Returns all active auxiliary names for business.
+     * @return array
+     */
     public function getAuxiliaryNames() {
         $retval = [];
         foreach($this->data['auxiliaryNames'] as $name) {
@@ -87,6 +91,36 @@ class BusinessInformation {
     }
 
     /**
+     * Check if business has entries indicating that it has been liquidated or filed for bankrupt.
+     * 
+     * @return false|string Either false if not or liquidation type code
+     */
+    public function isBusinessLiquidated() {
+        foreach($this->data['liquidations'] as $v) {
+            if($this->hasExpired($v) == false) {
+                return $v['type'];
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if business company form entries that have not ended.
+     * 
+     * @return boolean
+     */
+    public function hasActiveCompanyForms() {
+        foreach($this->data['companyForms'] as $v) {
+            if($this->hasExpired($v) == false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Translates source-integer in data to a human readable form.
      * 
      * @param  int $source_id Source id from data
@@ -96,7 +130,12 @@ class BusinessInformation {
         return isset(self::$sources[$source_id]) ? self::$sources[$source_id] : $source_id;
     }
 
-    private function hasExpired($data) {
+    /**
+     * Takes endDate value from array to check if date has expired.
+     * @param  array   $data
+     * @return boolean
+     */
+    private function hasExpired(array $data) {
         if(empty($data['endDate'])) return false;
 
         $date1 = new \DateTime($data['endDate']);
